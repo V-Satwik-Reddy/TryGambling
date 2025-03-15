@@ -16,10 +16,18 @@ const userSchema = new mongoose.Schema({
     googleId:{
         type:String,
     },
-    money:{
+    balance:{
         type:Number,
         default:0
-    }
+    },
+    claimed:{
+        type:Boolean,
+        default:false
+    },
+    claimedAt:{
+        type:Date,
+        default:null
+    },
 },
 { timestamps:true})
 
