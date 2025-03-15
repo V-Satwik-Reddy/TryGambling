@@ -33,8 +33,9 @@ mongoose.connect(process.env.MONGO_URL)
 
 //routes
 app.use("/auth", require("./routes/auth"));
+app.use("/coin", require("./routes/coin"));
 app.use("/protected", require("./routes/protected"));
-
+app.use("/user", require("./routes/user"));
 
 const port=process.env.PORT||5000;
 app.listen(port, () => console.log(`Example app listening on http://localhost:${port}`))
