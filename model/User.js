@@ -7,18 +7,21 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true,
+        index: true,
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        select: false
     },
     googleId:{
         type:String,
     },
     balance:{
         type:Number,
-        default:0
+        default:1000
     },
     claimed:{
         type:Boolean,
