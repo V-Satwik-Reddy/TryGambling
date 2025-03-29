@@ -1,9 +1,9 @@
-const express= require('express');
-const router=express.Router();
-const User=require('../model/User');
-const auth=require('../middleware/auth');
+const express = require('express');
+const router = express.Router();
+const User = require('../model/User');
+const auth = require('../middleware/auth');
+const redis = new (require('ioredis'))(process.env.REDIS_URL);
 
-//flip a coin
 router.post("/flip", auth, async (req, res) => {
     try {
         const { choice, amount } = req.body;
@@ -12,11 +12,14 @@ router.post("/flip", auth, async (req, res) => {
             return res.status(400).json({ message: "All fields are required" });
         }
 
-        if (amount <= 0) {
+        const betAmount = Number(amount);
+        let userBalance = Number(req.user.balance);
+
+        if (betAmount <= 0) {
             return res.status(400).json({ message: "Amount must be positive" });
         }
 
-        if (amount > req.user.balance) {
+        if (betAmount > userBalance) {
             return res.status(400).json({ message: "Insufficient balance" });
         }
 
@@ -24,18 +27,26 @@ router.post("/flip", auth, async (req, res) => {
         const outcome = outcomes[Math.random() < 0.5 ? 0 : 1];
 
         if (choice.toLowerCase() === outcome) {
-            req.user.balance += Number(amount);
-            await req.user.save();
-            return res.json({ message: "🎉 You won!", outcome, balance: req.user.balance });
+            userBalance += betAmount;
+            console.log()
+            await redis.hset(req.user.id, "balance", userBalance);
+            await redis.rpush(req.user.id + ":BetHistory", JSON.stringify({ amount: betAmount, choice, outcome, result: "won", time: new Date() }));
+            await User.findByIdAndUpdate(req.user.id, { balance: userBalance });
+
+            return res.json({ message: "🎉 You won!", outcome, balance: userBalance });
         }
 
-        req.user.balance -= Number(amount);
-        await req.user.save();
-        return res.json({ message: "😢 You lost!", outcome, balance: req.user.balance });
+        userBalance -= betAmount;
+        await redis.hset(req.user.id, "balance", userBalance);
+        await redis.rpush(req.user.id + ":BetHistory", JSON.stringify({ amount: betAmount, choice, outcome, result: "loss", time: new Date() }));
+        await User.findByIdAndUpdate(req.user.id, { balance: userBalance });
+
+        return res.json({ message: "😢 You lost!", outcome, balance: userBalance });
 
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-module.exports=router;
+
+module.exports = router;
