@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../model/User");
+const redis = new (require('ioredis'))(process.env.REDIS_URL);
 
 module.exports = async (req, res, next) => {
     try{
@@ -8,11 +9,14 @@ module.exports = async (req, res, next) => {
             return res.status(401).json({message:"no token provided"});
         }
         const decoded=jwt.verify(token,process.env.JWT_SECRET);
-        const user=await User.findById(decoded.id);
+        const user=await redis.hgetall(decoded.id);
         if(!user){
-            return res.status(401).json({message:"Unauthorized"}).select("-password");
+            return res.status(401).json({message:"Unauthorized"});
         }
-        req.user=user;
+        req.user={
+            id:decoded.id,
+            balance:user.balance,
+        };
         next();
     }catch(err){
         console.error(err);
