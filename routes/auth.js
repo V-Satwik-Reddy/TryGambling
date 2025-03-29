@@ -37,7 +37,7 @@ router.post("/signup", async (req, res) => {
       sameSite: "none",
       maxAge: 24*60*60*1000
     });
-    await redis.hset(user._id, "cookie",token,"balance",user.balance,"claimed",user.claimed,"claimedAt",user.claimedAt,"userid",JSON.stringify(user._id));
+    await redis.hset(user._id, "balance",user.balance, "claimed",user.claimed, "claimedAt",user.claimedAt);
     await redis.expire(user._id, 24*60*60*1000);
     return res.json({ message: "User created successfully" ,user});
   }catch(err){
@@ -66,7 +66,7 @@ router.post("/login", async (req, res) => {
     sameSite: "none",
     maxAge: 24*60*60*1000
   });
-  await redis.hset(user._id, "cookie",token,"balance",user.balance,"claimed",user.claimed,"claimedAt",user.claimedAt,"userid",JSON.stringify(user._id));
+  await redis.hset(user._id,"balance",user.balance,"claimed",user.claimed,"claimedAt",user.claimedAt);
   await redis.expire(user._id, 24*60*60*1000);
   return res.json({message:"User signed in successfully",user});
 }catch(err){
@@ -114,7 +114,7 @@ router.get("/google/callback", async (req, res) => {
         sameSite: "none",
         maxAge: 24*60*60*1000
       });
-      await redis.hset(userInfoser._id, "cookie",token,"balance",user.balance,"claimed",user.claimed,"claimedAt",user.claimedAt,"userid",JSON.stringify(userInfo.id));
+      await redis.hset(userInfo._id,"balance",userInfo.balance,"claimed",userInfo.claimed,"claimedAt",userInfo.claimedAt);
       await redis.expire(user._id, 24*60*60*1000);
       res.json({ message: "Login Successful", user: userInfo });
 
