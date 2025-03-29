@@ -34,6 +34,32 @@ mongoose.connect(process.env.MONGO_URL)
 app.use("/auth", require("./routes/auth"));
 app.use("/coin", require("./routes/coin"));
 app.use("/user", require("./routes/user"));
+app.get('/api/routes', (req, res) => {
+    res.json(getAllRoutes(app));
+  });
 
+  
+  const getAllRoutes = (app) => {
+    const routes = [];
+    const extractRoutes = (stack, basePath = '') => {
+      stack.forEach((layer) => {
+        if (layer.route) {
+          routes.push({
+            path: basePath + layer.route.path,
+            methods: Object.keys(layer.route.methods).join(', ').toUpperCase(),
+          });
+        } else if (layer.name === 'router' && layer.handle.stack) {
+          extractRoutes(layer.handle.stack, basePath + (layer.regexp.source.replace("\\/?(?=\\/|$)", "").replace("^", "").replace("$", "") || ''));
+        }
+      });
+    };
+  
+    extractRoutes(app._router.stack);
+    return routes;
+  };
+  
+  // Log all routes
+  console.log(getAllRoutes(app));
+  
 const port=process.env.PORT||5000;
 app.listen(port, () => console.log(`Example app listening on http://localhost:${port}`))
