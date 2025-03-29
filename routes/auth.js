@@ -29,9 +29,9 @@ router.post("/signup", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const { insertedId } = await User.collection.insertOne({ email, name, password: hashedPassword });
+    let user = await User.create({ email, name, password: hashedPassword });
 
-    const user = await User.findOne({ _id: insertedId }).select("-password").lean();
+    user = await User.findOne({ email:email }).select("-password").lean();
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "24h" });
 
@@ -56,7 +56,7 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   try{ 
       const { email, password } = req.body;
-      let user= await User.findOne({email}).select(+"password").lean();
+      let user= await User.findOne({email}).select("+password").lean();
       if(!user){
         return res.status(400).json({message:"User does not exist"});
       }
