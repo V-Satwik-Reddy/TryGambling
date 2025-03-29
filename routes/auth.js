@@ -7,9 +7,8 @@ const dotenv = require("dotenv");
 const auth=require("../middleware/auth");
 dotenv.config();
 const Redis=require("ioredis");
-const redis = new Redis(process.env.REDIS_URL);
+const redis = new Redis(process.env.REDIS_URL+ '?family=0');
 const bcrypt = require("bcryptjs");
-const saltRounds = 10;
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const REDIRECT_URI = "http://localhost:3000/auth/google/callback";
@@ -27,7 +26,7 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 8);
 
     let user = await User.create({ email, name, password: hashedPassword });
 

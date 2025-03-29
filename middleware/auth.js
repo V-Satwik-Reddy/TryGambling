@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../model/User");
-const redis = new (require('ioredis'))(process.env.REDIS_URL);
+const redis = new (require('ioredis'))(process.env.REDIS_URL + '?family=0');
 
 module.exports = async (req, res, next) => {
     try{

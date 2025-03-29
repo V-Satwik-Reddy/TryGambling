@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../model/User');
 const auth = require('../middleware/auth');
-const redis = new (require('ioredis'))(process.env.REDIS_URL);
+const redis = new (require('ioredis'))(process.env.REDIS_URL+ '?family=0');
 
 router.post("/flip", auth, async (req, res) => {
     try {

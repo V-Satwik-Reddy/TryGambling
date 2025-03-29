@@ -3,7 +3,7 @@ const router=express.Router();
 const User=require('../model/User');
 const auth=require('../middleware/auth');
 const cron = require("node-cron");
-const redis = new (require('ioredis'))(process.env.REDIS_URL);
+const redis = new (require('ioredis'))(process.env.REDIS_URL+ '?family=0');
 
 // Cron job to add option to add balance to users every 24hrs
 cron.schedule("0 0 * * *", async () => {
