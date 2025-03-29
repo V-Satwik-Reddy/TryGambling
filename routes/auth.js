@@ -4,15 +4,16 @@ const User = require("../model/User");
 const jwt=require("jsonwebtoken");
 const axios = require("axios");
 const dotenv = require("dotenv");
-const cors = require("cors");
+const auth=require("../middleware/auth");
 dotenv.config();
+const Redis=require("ioredis");
+const redis = new Redis(process.env.REDIS_URL);
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const REDIRECT_URI = "http://localhost:3000/auth/google/callback";
 
 //signup
-
 router.post("/signup", async (req, res) => {
   try{
     const { email,name, password } = req.body;
@@ -36,6 +37,8 @@ router.post("/signup", async (req, res) => {
       sameSite: "none",
       maxAge: 24*60*60*1000
     });
+    await redis.hset(user._id, "cookie",token,"balance",user.balance,"claimed",user.claimed,"claimedAt",user.claimedAt,"userid",JSON.stringify(user._id));
+    await redis.expire(user._id, 24*60*60*1000);
     return res.json({ message: "User created successfully" ,user});
   }catch(err){
     res.status(500).json({error:err.message});
@@ -48,10 +51,10 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   let user= await User.findOne({email});
   if(!user){
-    res.status(400).json({message:"User does not exist"});
+    return res.status(400).json({message:"User does not exist"});
   }
   if(user.password!==password){
-    res.status(400).json({message:"Invalid password"});
+    return  res.status(400).json({message:"Invalid password"});
   }
   
   //create the cookie
@@ -63,7 +66,8 @@ router.post("/login", async (req, res) => {
     sameSite: "none",
     maxAge: 24*60*60*1000
   });
-
+  await redis.hset(user._id, "cookie",token,"balance",user.balance,"claimed",user.claimed,"claimedAt",user.claimedAt,"userid",JSON.stringify(user._id));
+  await redis.expire(user._id, 24*60*60*1000);
   return res.json({message:"User signed in successfully",user});
 }catch(err){
   res.status(500).json({error:err.message});
@@ -110,6 +114,8 @@ router.get("/google/callback", async (req, res) => {
         sameSite: "none",
         maxAge: 24*60*60*1000
       });
+      await redis.hset(userInfoser._id, "cookie",token,"balance",user.balance,"claimed",user.claimed,"claimedAt",user.claimedAt,"userid",JSON.stringify(userInfo.id));
+      await redis.expire(user._id, 24*60*60*1000);
       res.json({ message: "Login Successful", user: userInfo });
 
   } catch (error) {
@@ -118,8 +124,9 @@ router.get("/google/callback", async (req, res) => {
 });
 
 // Logout: Clear Cookie
-router.get("/logout", (req, res) => {
+router.get("/logout", auth ,async (req, res) => {
   res.clearCookie("token");
+  await redis.del(req.user._id);
   res.json({ message: "Logged out" });
 });
 
