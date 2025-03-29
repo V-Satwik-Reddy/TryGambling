@@ -34,6 +34,9 @@ mongoose.connect(process.env.MONGO_URL)
 app.use("/auth", require("./routes/auth"));
 app.use("/coin", require("./routes/coin"));
 app.use("/user", require("./routes/user"));
+app.get("/", (req, res) => {
+    res.send("Hello from the server.You can find the routes from /api/routes")
+});
 app.get('/api/routes', (req, res) => {
     res.json(getAllRoutes(app));
   });
