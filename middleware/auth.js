@@ -16,6 +16,7 @@ module.exports = async (req, res, next) => {
         req.user={
             id:decoded.id,
             balance:user.balance,
+            email:user.email,
         };
         next();
     }catch(err){
