@@ -8,7 +8,7 @@ const redis = new (require('ioredis'))(process.env.REDIS_URL+ '?family=0');
 // Cron job to add option to add balance to users every 24hrs
 cron.schedule("0 0 * * *", async () => {
   try {
-      await User.updateMany({ claimed: true }, { $set: { claimed: false } });
+      await User.updateMany({}, { $inc: { balance: 1000 } });
       console.log("All claimed statuses reset to false.");
   } catch (error) {
       console.error("Error updating claimed status:", error.message);
