@@ -31,7 +31,16 @@ router.get("/claim", auth, async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
+router.get("/profile",auth,async(req,res)=>{
+    try{
+        res.json({
+            email:req.user.email,
+            balance:req.user.balance,
+        })
+    }catch(error){
+        res.status(500).json({error:error.message})
+    }
+})
 //get user balance
 router.get("/balance", auth, (req, res) => {
     res.json({ balance: req.user.balance });

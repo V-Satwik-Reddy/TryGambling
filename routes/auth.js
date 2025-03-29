@@ -18,7 +18,7 @@ const REDIRECT_URI = "http://localhost:3000/auth/google/callback";
 router.post("/signup", async (req, res) => {
   try {
     const { email, name, password } = req.body;
-    if (!name || !email || !password) {
+    if ( !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -42,10 +42,10 @@ router.post("/signup", async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    await redis.hset(user._id, "balance", user.balance, "claimed", user.claimed);
+    await redis.hset(user._id, "balance", user.balance, "claimed", user.claimed,"email", user.email);
     await redis.expire(user._id, 24 * 60 * 60); 
 
-    return res.json({ message: "User created successfully", user });
+    return res.json({ message: "User created successfully"});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
@@ -67,7 +67,7 @@ router.post("/login", async (req, res) => {
       delete user.password;
 
       const token=jwt.sign({id:user._id},process.env.JWT_SECRET,{ expiresIn: "24h" });
-      await redis.hset(user._id,"balance",user.balance,"claimed",user.claimed);
+      await redis.hset(user._id,"balance",user.balance,"claimed",user.claimed,"email",user.email);
       await redis.expire(user._id, 24*60*60);
       res.cookie("token",token,{
         httpOnly:true,
@@ -75,7 +75,7 @@ router.post("/login", async (req, res) => {
         sameSite: "none",
         maxAge: 24*60*60*1000
       });
-      return res.json({message:"User signed in successfully",user});
+      return res.json({message:"User signed in successfully"});
   }catch(err){
       res.status(500).json({error:err.message});
   }
@@ -121,7 +121,7 @@ router.get("/google/callback", async (req, res) => {
         sameSite: "none",
         maxAge: 24*60*60*1000
       });
-      await redis.hset(userInfo._id,"balance",userInfo.balance,"claimed",userInfo.claimed);
+      await redis.hset(userInfo._id,"balance",userInfo.balance,"claimed",userInfo.claimed,"email",userInfo.email);
       await redis.expire(user._id, 24*60*60);
       res.json({ message: "Login Successful", user: userInfo });
 
@@ -130,6 +130,10 @@ router.get("/google/callback", async (req, res) => {
   }
 });
 
+//verify
+router.get("/verify", auth, async (req, res) => {
+  res.json("verifid");
+});
 // Logout: Clear Cookie
 router.get("/logout", auth ,async (req, res) => {
   res.clearCookie("token");
