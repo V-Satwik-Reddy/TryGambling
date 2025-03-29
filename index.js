@@ -11,7 +11,6 @@ app.use(morgan("dev"))
 
 app.use(cookieParser());
 
-
 //  Improved CORS setup for Cookies
 app.use(
     cors({
@@ -34,7 +33,6 @@ mongoose.connect(process.env.MONGO_URL)
 //routes
 app.use("/auth", require("./routes/auth"));
 app.use("/coin", require("./routes/coin"));
-app.use("/protected", require("./routes/protected"));
 app.use("/user", require("./routes/user"));
 
 const port=process.env.PORT||5000;
