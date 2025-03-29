@@ -26,11 +26,7 @@ const userSchema = new mongoose.Schema({
     claimed:{
         type:Boolean,
         default:false
-    },
-    claimedAt:{
-        type:Date,
-        default:null
-    },
+    }
 },
 { timestamps:true})
 

@@ -14,7 +14,7 @@ app.use(cookieParser());
 //  Improved CORS setup for Cookies
 app.use(
     cors({
-        origin: "http://localhost:3000",
+        origin: ["http://localhost:3000","https://mounesh-13.github.io"],
         credentials: true, // **Ensures frontend can send & receive cookies**
         methods: ["GET", "POST", "PUT", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization"]

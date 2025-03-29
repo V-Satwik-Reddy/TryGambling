@@ -42,7 +42,7 @@ router.post("/signup", async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    await redis.hset(user._id, "balance", user.balance, "claimed", user.claimed, "claimedAt", user.claimedAt);
+    await redis.hset(user._id, "balance", user.balance, "claimed", user.claimed);
     await redis.expire(user._id, 24 * 60 * 60); 
 
     return res.json({ message: "User created successfully", user });
@@ -67,7 +67,7 @@ router.post("/login", async (req, res) => {
       delete user.password;
 
       const token=jwt.sign({id:user._id},process.env.JWT_SECRET,{ expiresIn: "24h" });
-      await redis.hset(user._id,"balance",user.balance,"claimed",user.claimed,"claimedAt",user.claimedAt);
+      await redis.hset(user._id,"balance",user.balance,"claimed",user.claimed);
       await redis.expire(user._id, 24*60*60);
       res.cookie("token",token,{
         httpOnly:true,
@@ -121,7 +121,7 @@ router.get("/google/callback", async (req, res) => {
         sameSite: "none",
         maxAge: 24*60*60*1000
       });
-      await redis.hset(userInfo._id,"balance",userInfo.balance,"claimed",userInfo.claimed,"claimedAt",userInfo.claimedAt);
+      await redis.hset(userInfo._id,"balance",userInfo.balance,"claimed",userInfo.claimed);
       await redis.expire(user._id, 24*60*60);
       res.json({ message: "Login Successful", user: userInfo });
 
