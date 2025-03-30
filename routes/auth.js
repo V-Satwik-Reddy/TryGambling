@@ -12,7 +12,7 @@ const bcrypt = require("bcryptjs");
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const REDIRECT_URI = "http://localhost:3000/auth/google/callback";
-
+const FRONTEND_URL = process.env.FRONTEND_URL;
 //signup
 router.post("/signup", async (req, res) => {
   try {
@@ -121,11 +121,10 @@ router.get("/google/callback", async (req, res) => {
         maxAge: 24*60*60*1000
       });
       await redis.hset(userInfo._id,"balance",userInfo.balance,"claimed",userInfo.claimed,"email",userInfo.email);
-      await redis.expire(user._id, 24*60*60);
-      res.json({ message: "Login Successful", user: userInfo });
-
-  } catch (error) {
-      res.status(500).json({ error: error.response?.data || error.message });
+      await redis.expire(userInfo._id, 24*60*60);
+      return res.redirect(`${FRONTEND_URL}/#/`);
+    } catch (error) {
+        return res.redirect(`${FRONTEND_URL}/#/login?error=OAuthFailed`);
   }
 });
 
