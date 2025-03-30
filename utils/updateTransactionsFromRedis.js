@@ -28,13 +28,13 @@ const updateTransactionsFromRedis = async () => {
 
       bets.forEach((bet) => {
         console.log(JSON.parse(bet));
-        const { amount, choice, result,date } = JSON.parse(bet);
+        const { amount, choice, result,time } = JSON.parse(bet);
         transactions.push({
           userId,
           choice,
           result,
           amount,
-          date
+          time
         });
       });
 
