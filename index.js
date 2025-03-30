@@ -7,6 +7,7 @@ const cors = require('cors')
 const cookieParser = require('cookie-parser')
 const cron = require("node-cron");
 const User = require('./model/User')
+const updateTransactionsFromRedis = require('./utils/updateTransactionsFromRedis')
 app.use(express.json())
 app.use(morgan("dev"))
 
@@ -35,6 +36,7 @@ mongoose.connect(process.env.MONGO_URL)
 app.use("/auth", require("./routes/auth"));
 app.use("/coin", require("./routes/coin"));
 app.use("/user", require("./routes/user"));
+app.use("/transaction", require("./routes/transaction"));
 app.get("/", (req, res) => {
     res.send("Hello from the server.You can find the routes from /api/routes")
 });
@@ -62,8 +64,6 @@ app.get('/api/routes', (req, res) => {
     return routes;
   };
   
-  // Log all routes
-  console.log(getAllRoutes(app));
   
   // Cron job to add option to add balance to users every 24hrs
   cron.schedule("0 0 * * *", async () => {
@@ -75,5 +75,9 @@ app.get('/api/routes', (req, res) => {
     }
   });
 
+  cron.schedule("*/5 * * * *", () => {
+    console.log("Syncing transactions...");
+    updateTransactionsFromRedis();
+  });
 const port=process.env.PORT||5000;
 app.listen(port, () => console.log(`Example app listening on http://localhost:${port}`))
