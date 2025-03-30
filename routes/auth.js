@@ -151,7 +151,7 @@ router.get("/verify", auth, async (req, res) => {
 // Logout: Clear Cookie
 router.get("/logout", auth ,async (req, res) => {
   res.clearCookie("token",{ httpOnly: true, sameSite: "None", secure: true });
-  await redis.del(req.user._id);
+  await redis.del(req.user.id);
   res.json({ message: "Logged out" });
 });
 
