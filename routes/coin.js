@@ -30,7 +30,7 @@ router.post("/flip", auth, async (req, res) => {
             userBalance += betAmount;
             console.log()
             await redis.hset(req.user.id, "balance", userBalance);
-            await redis.rpush(req.user.id + ":BetHistory", JSON.stringify({ amount: betAmount, choice, result: "Win"}));
+            await redis.rpush(req.user.id + ":BetHistory", JSON.stringify({ amount: betAmount, choice,  result: "Won", time: new Date() }));
             await User.findByIdAndUpdate(req.user.id, { balance: userBalance });
 
             return res.json({ message: "🎉 You won!", outcome, balance: userBalance });
@@ -38,7 +38,7 @@ router.post("/flip", auth, async (req, res) => {
 
         userBalance -= betAmount;
         await redis.hset(req.user.id, "balance", userBalance);
-        await redis.rpush(req.user.id + ":BetHistory", JSON.stringify({ amount: betAmount, choice, result: "Loss" }));
+        await redis.rpush(req.user.id + ":BetHistory", JSON.stringify({ amount: betAmount, choice,  result: "Loss", time: new Date() }));
         await User.findByIdAndUpdate(req.user.id, { balance: userBalance });
 
         return res.json({ message: "😢 You lost!", outcome, balance: userBalance });

@@ -12,7 +12,7 @@ router.get("/",auth ,async(req,res)=>{
             data=JSON.parse(data);
             return res.status(200).json(data)
         }
-        data=await Transaction.find({userId:req.user.id}).sort({createdAt:-1});
+        data=await Transaction.find({userId:req.user.id}).sort({date:-1});
         if(data.length===0){
             return res.status(404).send("No transactions found")
         }
