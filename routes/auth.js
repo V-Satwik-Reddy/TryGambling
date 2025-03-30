@@ -122,9 +122,10 @@ router.get("/google/callback", async (req, res) => {
       });
       await redis.hset(userInfo._id,"balance",userInfo.balance,"claimed",userInfo.claimed,"email",userInfo.email);
       await redis.expire(userInfo._id, 24*60*60);
-      return res.redirect(`${FRONTEND_URL}/#/`);
+      return res.redirect("https://mounesh-13.github.io/Gamble/#/);
     } catch (error) {
-        return res.redirect(`${FRONTEND_URL}/#/login?error=OAuthFailed`);
+        console.error("Google Auth Error:", error);
+        res.status(500).json({ message: "Authentication failed" });
   }
 });
 
