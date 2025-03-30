@@ -1,32 +1,40 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
+      type: String,
     },
     email: {
-        type: String,
-        required: true,
-        unique: true,
-        index: true,
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
     },
     password: {
-        type: String,
-        required: true,
-        select: false
+      type: String,
+      select: false,
+      validate: {
+        validator: function (value) {
+          // Password is required only if googleId is absent
+          return this.googleId || value;
+        },
+        message: "Password is required unless using Google OAuth.",
+      },
     },
-    googleId:{
-        type:String,
+    googleId: {
+      type: String,
     },
-    balance:{
-        type:Number,
-        default:1000
+    balance: {
+      type: Number,
+      default: 1000,
     },
-    claimed:{
-        type:Boolean,
-        default:false
-    }
-},
-{ timestamps:true})
+    claimed: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { timestamps: true }
+);
 
 module.exports = mongoose.model("User", userSchema);
