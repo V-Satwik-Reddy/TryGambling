@@ -18,7 +18,7 @@ router.get("/",auth ,async(req,res)=>{
         }
         // Store the data in Redis for future requests
         await redis.set(`${req.user.id}:History`,JSON.stringify(data))
-        await redis.expire(req.user.id,60*5) 
+        await redis.expire(`${req.user.id}:History`,60*5) 
         res.status(200).json(data)
     } catch (error) {
         console.error("Error getting transactions:", error);
