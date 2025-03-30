@@ -7,7 +7,7 @@ const updateTransactionsFromRedis = require('../utils/updateTransactionsFromRedi
 
 router.get("/",auth ,async(req,res)=>{
     try {
-        let data=redis.hget(req.user.id,"BetHistory");
+        let data=redis.get(req.user.id,"BetHistory");
         if(data.length> 0){
             data=JSON.parse(data);
             return res.status(200).json(data)
@@ -17,7 +17,7 @@ router.get("/",auth ,async(req,res)=>{
             return res.status(404).send("No transactions found")
         }
         // Store the data in Redis for future requests
-        await redis.hset(req.user.id,"BetHistory",JSON.stringify(data))
+        await redis.set(req.user.id,"BetHistory",JSON.stringify(data))
         await redis.expire(req.user.id,60*5) 
         res.status(200).json(data)
     } catch (error) {
