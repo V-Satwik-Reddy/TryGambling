@@ -12,7 +12,6 @@ const bcrypt = require("bcryptjs");
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const REDIRECT_URI = "https://trygambling.up.railway.app/auth/google/callback";
-const FRONTEND_URL = process.env.FRONTEND_URL;
 //signup
 router.post("/signup", async (req, res) => {
   try {
@@ -82,8 +81,8 @@ router.post("/login", async (req, res) => {
 
 //google oAuth Login
 router.get("/google", (req, res) => {
-  const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=email profile`;
-  res.redirect(authUrl);
+    const googleAuthURL = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=email profile&access_type=offline`;
+    res.redirect(googleAuthURL);
 });
 
 //google oAuth callback
@@ -96,32 +95,48 @@ router.get("/google/callback", async (req, res) => {
 
   try {
       // Exchange code for access token
-      const { data } = await axios.post("https://oauth2.googleapis.com/token", null, {
-          params: {
-              client_id: CLIENT_ID,
-              client_secret: CLIENT_SECRET,
-              redirect_uri: REDIRECT_URI,
-              grant_type: "authorization_code",
-              code,
-          },
-      });
+        const { data } = await axios.post("https://oauth2.googleapis.com/token", null, {
+            params: {
+                client_id: CLIENT_ID,
+                client_secret: CLIENT_SECRET,
+                code,
+                redirect_uri: REDIRECT_URI,
+                grant_type: "authorization_code",
+            },
+        });
 
-      // Fetch user info
-      const { data: userInfo } = await axios.get("https://www.googleapis.com/oauth2/v2/userinfo", {
-          headers: { Authorization: `Bearer ${data.access_token}` },
-      });
+        const { access_token } = data;
 
-      //create the cookie
-      const token=jwt.sign({id:userInfo._id},process.env.JWT_SECRET,{ expiresIn: "24h" });
+        // Fetch user data from Google
+        const { data: googleUser } = await axios.get("https://www.googleapis.com/oauth2/v1/userinfo", {
+            headers: { Authorization: `Bearer ${access_token}` },
+        });
 
-      res.cookie("token",token,{
-        httpOnly:true,
-        secure: true,
-        sameSite: "none",
-        maxAge: 24*60*60*1000
-      });
-      await redis.hset(userInfo._id,"balance",userInfo.balance,"claimed",userInfo.claimed,"email",userInfo.email);
-      await redis.expire(userInfo._id, 24*60*60);
+        // Check if user exists
+        let user = await User.findOne({ email: googleUser.email });
+
+        if (!user) {
+            // Create a new user if not found
+            user = new User({
+                username: googleUser.name,
+                email: googleUser.email,
+                googleId: googleUser.id,
+            });
+            await user.save();
+        }
+
+        // Generate JWT token
+        const token = jwt.sign({ id: user._id, verified: true }, process.env.JWT_SECRET, { expiresIn: "24h" });
+
+        // Set JWT token in cookie
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true, 
+            sameSite: "None",
+            maxAge: 24 * 60 * 60 * 1000, 
+        });
+      await redis.hset(user._id,"balance",user.balance,"claimed",user.claimed,"email",user.email);
+      await redis.expire(user._id, 24*60*60);
       return res.redirect("https://mounesh-13.github.io/Gamble/#/");
     } catch (error) {
         console.error("Google Auth Error:", error);
