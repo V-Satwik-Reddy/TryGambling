@@ -1,6 +1,6 @@
 const express=require("express");
 const router=express.Router();
-const redis=new (require("ioredis"))(process.env.REDIS_URL);
+const redis=new (require("ioredis"))(process.env.REDIS_URL +'?family=0');
 const Transaction=require("../model/Transaction")
 const auth=require("../middleware/auth")
 const updateTransactionsFromRedis = require('../utils/updateTransactionsFromRedis')
