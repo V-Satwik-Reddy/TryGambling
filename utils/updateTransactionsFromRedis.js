@@ -27,11 +27,12 @@ const updateTransactionsFromRedis = async () => {
       const bets = await redis.lrange(key, 0, -1); // Get full list of bets
 
       bets.forEach((bet) => {
-        const { amount, choice, outcome } = JSON.parse(bet);
+        console.log(JSON.parse(bet));
+        const { amount, choice, result } = JSON.parse(bet);
         transactions.push({
           userId,
           choice,
-          result: outcome === "won" ? "Win" : "Loss",
+          result,
           amount,
         });
       });
