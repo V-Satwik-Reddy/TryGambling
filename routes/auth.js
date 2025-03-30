@@ -11,7 +11,7 @@ const redis = new Redis(process.env.REDIS_URL+ '?family=0');
 const bcrypt = require("bcryptjs");
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const REDIRECT_URI = "http://localhost:3000/auth/google/callback";
+const REDIRECT_URI = "https://trygambling.up.railway.app/auth/google/callback";
 const FRONTEND_URL = process.env.FRONTEND_URL;
 //signup
 router.post("/signup", async (req, res) => {
