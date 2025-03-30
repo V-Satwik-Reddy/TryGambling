@@ -112,7 +112,7 @@ router.get("/google/callback", async (req, res) => {
       });
 
       //create the cookie
-      const token=jwt.sign({id:user._id},process.env.JWT_SECRET,{ expiresIn: "24h" });
+      const token=jwt.sign({id:userInfo._id},process.env.JWT_SECRET,{ expiresIn: "24h" });
 
       res.cookie("token",token,{
         httpOnly:true,
