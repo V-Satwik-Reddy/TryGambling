@@ -81,7 +81,7 @@ router.post("/login", async (req, res) => {
 
 //google oAuth Login
 router.get("/google", (req, res) => {
-    const googleAuthURL = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=email profile&access_type=offline`;
+    const googleAuthURL = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=email profile`;
     res.redirect(googleAuthURL);
 });
 
